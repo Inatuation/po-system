@@ -1,0 +1,36 @@
+.footer_tools {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	background-color: var(--vt-c-tools-bg-active-color);
+	.footer_tools_start_button {
+		background-color: rgb(52, 150, 39);
+		color: var(--vt-c-tools-system-font-color);
+		text-align: center;
+		border-radius: 0 9999px 9999px 0;
+		line-height: 30px;
+		width: 100px;
+		img {
+			width: 20px;
+			height: 20px;
+			vertical-align: text-bottom;
+			margin-right: 5px;
+		}
+	}
+	.footer_tools_task_bar {
+		flex: 1;
+		height: 100%;
+		display: flex;
+		.tools_bar_item {
+			width: 150px;
+			height: 100%;
+			padding: 0 15px;
+			color: var(--vt-c-tools-system-font-color);
+			line-height: var(--vt-h-tools-system-footer-height);
+			background-color: var(--vt-c-tools-tools-bg);
+		}
+		.tools_bar_active_item {
+			background-color: var(--vt-c-tools-tools-bg-active);
+		}
+	}
+}

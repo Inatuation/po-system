@@ -1,0 +1,31 @@
+@import "../../comm.scss";
+.chat_main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    .lou_chat_main_header {
+        height: $chatHeaderHeight;
+        border-bottom: 1px solid #333;
+        .chat_title {
+            line-height: $chatHeaderHeight;
+            font-size: 24px;
+            padding-left: 24px;
+        }
+    }
+    .lou_chat_main_content {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    .lou_chat_main_input {
+        height: 200px;
+        border-top: 1px solid #333;
+        .input_box {
+            width: 100%;
+            height: 100%;
+            background-color: $chatBgMainColor;
+            color: $chatGlobColor;
+        }
+    }
+}

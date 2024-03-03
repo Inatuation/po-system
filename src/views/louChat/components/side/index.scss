@@ -1,0 +1,16 @@
+@import "../../comm.scss";
+.side_block {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    .side_header {
+        width: 100%;
+        height: $chatHeaderHeight;
+        background-color: rgb(25, 25, 25);
+    }
+    .side_main {
+        flex: 1;
+        overflow-y: auto;
+    }
+}

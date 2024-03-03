@@ -1,0 +1,22 @@
+@import "./comm.scss";
+.lou_chat_program {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	border-radius: $chatBorderRadius;
+	overflow: hidden;
+	color: $chatGlobColor;
+	.lou_chat_tools {
+		width: 70px;
+		height: 100%;
+	}
+	.lou_chat_side {
+		width: 300px;
+		height: 100%;
+		background-color: $chatBgSideColor;
+	}
+	.lou_chat_main {
+		flex: 1;
+		background-color: $chatBgMainColor;
+	}
+}
