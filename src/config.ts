@@ -1,8 +1,12 @@
 export const __POWERED_BY_WUJIE__ = false; // 是否启用无界
 
+export const logoUrl: any = {
+	music: new URL('@/assets/desktop/music.png', import.meta.url).href,
+};
+
 export const serverConfig = {
 	host: 'http://192.168.0.124',
-	port: 3000,
+	port: 8112,
 };
 
 export const wujieAppList: any = {
@@ -14,6 +18,7 @@ export const wujieAppList: any = {
 		defaultWidth: 1000,
 		defaultHeight: 800,
 		customHeader: true,
+		logo: logoUrl['music'],
 	},
 	chat: {
 		alive: true,

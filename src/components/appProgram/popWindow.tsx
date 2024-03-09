@@ -158,13 +158,13 @@ export default class PopWindow {
 			render: (ctx: any) => {
 				return (
 					<div
-						class={{ pop_window: true, pop_window_active: isActive.value, window_border: !customHeader }}
+						class={{ pop_window: true, pop_window_active: isActive.value, window_border: !customHeader.value }}
 						style={{ left: positionLeft.value, top: positionTop.value, width: `${styleWidth.value}px`, height: `${styleHeight.value}px` }}
-						onMouseup={!customHeader ? mouseUp : () => {}}
+						onMouseup={!customHeader.value ? mouseUp : () => {}}
 						onMousedown={withModifiers(mouseDown, ['left'])}
 						onMousemove={mouseMove}
 					>
-						{!customHeader && (
+						{!customHeader.value && (
 							<div class={{ pop_window_tools: true, active_program: isActive.value }}>
 								<span class="pop_window_tools_left desabled-copy" data-move={true}>
 									{fileName}

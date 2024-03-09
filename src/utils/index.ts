@@ -1,5 +1,5 @@
 import AppPogram from '@/components/appProgram';
-import { __POWERED_BY_WUJIE__, wujieAppList } from '@/config';
+import { __POWERED_BY_WUJIE__, logoUrl, wujieAppList } from '@/config';
 import type { FilesResultType } from '@/types/popWindow';
 
 /**
@@ -17,21 +17,24 @@ export function exportFiles() {
 		Reflect.ownKeys(modules).forEach((file) => {
 			// 遍历modules模块的属性
 			const str = (file as string).replace(/\//g, ''); // 去除字符串中的斜杠
-			const name = str.match(reg)?.[1] ? `${str.match(reg)?.[1]}.md` : `${str.match(reg)?.[2]}.exe`; // 根据匹配结果生成name
+			const res: RegExpMatchArray | null = str.match(reg);
+			const name = res?.[1] ? `${res?.[1]}.md` : `${res?.[2]}.exe`; // 根据匹配结果生成name
 			const params = {
 				name,
 				renderer: modules[file].default, // 获取模块的默认导出
+				logo: logoUrl[res ? res?.[1] || res?.[2] : ''],
 			};
 			result.push(params); // 将params对象添加到result数组中
 		});
 	}
 	let appList: Array<FilesResultType> = [];
-	// 读取config文件应用
 	if (__POWERED_BY_WUJIE__) {
+		// 读取config文件应用
 		appList = Reflect.ownKeys(wujieAppList).map((key: any) => {
 			return {
 				name: `${key}.exe`,
 				WUJIEAPP: true,
+				logo: wujieAppList[key].logo || '',
 			};
 		});
 	}
