@@ -1,11 +1,16 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    },
-    {
-      "path": "./tsconfig.app.json"
-    }
-  ]
+	"files": [],
+	"compilerOptions": {
+		"moduleResolution": "node",
+		"types": ["node"]
+	},
+	"include": ["src/plugin/transform-vue.ts"],
+	"references": [
+		{
+			"path": "./tsconfig.node.json"
+		},
+		{
+			"path": "./tsconfig.app.json"
+		}
+	]
 }
