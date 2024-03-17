@@ -1,4 +1,5 @@
 import PopWindow from '@/components/appProgram/popWindow';
+import { __CACHE__PROGRAM } from '@/config';
 import { setSessionStorage } from '@/utils';
 import { defineStore } from 'pinia';
 import { computed, reactive, watch } from 'vue';
@@ -7,11 +8,13 @@ const processes = defineStore('processes', () => {
 	const processesStack = reactive<Array<PopWindow>>([]); // 进程实例栈，先进后出先出后进
 	const processesMap = reactive<Map<string, PopWindow>>(new Map());
 
-	watch(processesStack, (newValue) => {
-		// pinia数据持久化
-		const data = newValue.map((item: any) => ({ fileName: item.fileName, programName: item.programName }));
-		setSessionStorage('processes', JSON.stringify(data));
-	});
+	if (__CACHE__PROGRAM) {
+		watch(processesStack, (newValue: any) => {
+			// pinia数据持久化
+			const data = newValue.map((item: any) => ({ fileName: item.fileName, programName: item.programName, logo: item.logo || '' }));
+			setSessionStorage('processes', JSON.stringify(data));
+		});
+	}
 	const activeProgram = computed(() => {
 		return processesStack[processesStack.length - 1];
 	});

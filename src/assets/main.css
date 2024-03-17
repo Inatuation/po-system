@@ -1,11 +1,11 @@
 @import './base.css';
+@import './theme.scss';
 
 html,
 #app {
 	width: 100%;
 	height: 100vh;
 	overflow: hidden;
-	color: var(--vt-c-tools-system-font-color);
 }
 
 a,

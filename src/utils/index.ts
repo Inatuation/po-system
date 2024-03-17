@@ -1,11 +1,17 @@
 import AppPogram from '@/components/appProgram';
-import { __POWERED_BY_WUJIE__, logoUrl, wujieAppList } from '@/config';
-import type { FilesResultType } from '@/types/popWindow';
+import { __CACHE__PROGRAM, __POWERED_BY_WUJIE__, getLogoUrl, wujieAppList } from '@/config';
+import { type FilesResultType } from '@/types/popWindow';
+
+let cacheFilesList: any;
 
 /**
  * 导出文件
  */
 export function exportFiles() {
+	// const cacheFilesList = LocalStorageUtil.getItem(FILESTORAGE);
+	if (cacheFilesList) {
+		return cacheFilesList;
+	}
 	const docsTemplate = import.meta.glob('../components/docsTemplate/*.vue', { eager: true }); // 导入docsTemplate模块
 	const views = import.meta.glob(['!**/views/desktop/*.tsx', '!**/views/loginPage/*.tsx', '../views/*/index.tsx'], { eager: true }); // 导入views模块
 	const modules = { ...docsTemplate, ...views } as any; // 合并docsTemplate和views模块
@@ -18,11 +24,11 @@ export function exportFiles() {
 			// 遍历modules模块的属性
 			const str = (file as string).replace(/\//g, ''); // 去除字符串中的斜杠
 			const res: RegExpMatchArray | null = str.match(reg);
-			const name = res?.[1] ? `${res?.[1]}.md` : `${res?.[2]}.exe`; // 根据匹配结果生成name
+			const programName = res?.[1] ? `${res?.[1]}.md` : `${res?.[2]}.exe`; // 根据匹配结果生成name
 			const params = {
-				name,
+				programName,
 				renderer: modules[file].default, // 获取模块的默认导出
-				logo: logoUrl[res ? res?.[1] || res?.[2] : ''],
+				logo: getLogoUrl(res?.[1] ? /md/ : /exe/),
 			};
 			result.push(params); // 将params对象添加到result数组中
 		});
@@ -32,13 +38,17 @@ export function exportFiles() {
 		// 读取config文件应用
 		appList = Reflect.ownKeys(wujieAppList).map((key: any) => {
 			return {
-				name: `${key}.exe`,
+				programName: `${key}.exe`,
 				WUJIEAPP: true,
 				logo: wujieAppList[key].logo || '',
 			};
 		});
 	}
-	return [...result, ...appList]; // 返回result数组
+	const cache = [...result, ...appList];
+	cacheFilesList = cache;
+	// console.log(cache);
+	// LocalStorageUtil.setItem(FILESTORAGE, cache);
+	return cache; // 返回result数组
 }
 
 /**
@@ -123,15 +133,42 @@ export function removeSessionStorage(key: string) {
 
 export function setProcessesPiniaData() {
 	// 重载pinia数据, 重新启动应用
-	let data: any = getSessionStorage('processes');
-	if (data) {
-		data = JSON.parse(data) as Array<any>;
-		if (data?.length) {
-			data.forEach((item: any) => {
-				if (item.programName) {
-					AppPogram.openProgram(item.programName);
-				}
-			});
+	if (__CACHE__PROGRAM) {
+		let data: any = getSessionStorage('processes');
+		if (data) {
+			data = JSON.parse(data) as Array<any>;
+			if (data?.length) {
+				console.log(data);
+				data.forEach((item: any) => {
+					if (item.programName) {
+						AppPogram.openProgram(item);
+					}
+				});
+			}
+		}
+	}
+}
+
+// localStorage封装
+
+class LocalStorageUtil {
+	static setItem(key: string, value: any): void {
+		localStorage.setItem(key, JSON.stringify(value));
+	}
+
+	static getItem(key: string): any | null {
+		const item = localStorage.getItem(key);
+		return item ? JSON.parse(item) : null;
+	}
+
+	static removeItem(key: string): void {
+		localStorage.removeItem(key);
+	}
+
+	static updateItem(key: string, newValue: any): void {
+		const item = LocalStorageUtil.getItem(key);
+		if (item) {
+			LocalStorageUtil.setItem(key, { ...item, ...newValue });
 		}
 	}
 }

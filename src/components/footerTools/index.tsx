@@ -1,38 +1,42 @@
+import bus from '@/eventBus';
+import dockStore from '@/stores/dockStore';
 import processes from '@/stores/processes';
-import { getProgramName } from '@/utils';
-import { defineComponent, computed } from 'vue';
+import { WindowType } from '@/types/popWindow';
+import { defineComponent } from 'vue';
 import './index.scss';
 
 export default defineComponent({
 	setup() {
 		const store = processes();
-		const activeProgram = computed(() => {
-			return store.activeProgram?.programName || '';
-		});
-		function clickBar(e: any) {
+		const dockStoreInstance = dockStore();
+		function clickMenu() {
+			dockStoreInstance.openDock();
+		}
+		function clickProgramBar(e: any) {
+			if (store.activeProgram.windowStatus === WindowType.MINIMIZE) {
+				bus.emit('WindowChange', WindowType.DEFAULT);
+			}
 			store.toggleProgram(e.target.dataset.programname);
 		}
 		return () => (
 			<div class="footer_tools">
-				<div class="footer_tools_start_button desabled-copy">
-					<img src={new URL('@/assets/windows.png', import.meta.url).href} />
-					<span>开始</span>
-				</div>
-				<div class="footer_tools_task_bar desabled-copy" onClick={clickBar}>
-					{() => {
-						const elements: any = [];
-						store.processesMap.forEach((program) => {
-							elements.push(
-								<div
-									data-programname={program.programName}
-									class={{ tools_bar_item: true, tools_bar_active_item: activeProgram.value === program.programName }}
-								>
-									{getProgramName(program.programName)}
-								</div>
-							);
-						});
-						return elements;
-					}}
+				<div class="footer_tools_flex_box">
+					<div class="footer_tools_menu_bar" onClick={clickMenu}>
+						<img src={new URL('@/assets/desktop/menu.png', import.meta.url).href} alt="菜单" />
+					</div>
+					<div class="footer_tools_task_bar desabled-copy" onClick={clickProgramBar}>
+						{() => {
+							const elements: any = [];
+							store.processesMap.forEach((program) => {
+								elements.push(
+									<div data-programname={program.programName} class="tools_bar_item" data-programName={program.programName}>
+										<img src={new URL(program.logo, import.meta.url).href} alt={program.programName} data-programName={program.programName} />
+									</div>
+								);
+							});
+							return elements;
+						}}
+					</div>
 				</div>
 			</div>
 		);

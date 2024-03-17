@@ -8,6 +8,9 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     '文档.html': typeof import('./src/components/docsTemplate/文档.html.vue')['default']
+    'Adad.html': typeof import('./src/components/docsTemplate/adad.html.vue')['default']
+    'Cahca.html': typeof import('./src/components/docsTemplate/cahca.html.vue')['default']
+    'Cccc.html': typeof import('./src/components/docsTemplate/cccc.html.vue')['default']
     'README.html': typeof import('./src/components/docsTemplate/README.html.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
