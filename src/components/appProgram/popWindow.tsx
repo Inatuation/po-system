@@ -1,11 +1,11 @@
 /**全局封装组件的一些步骤 */
 import { __POWERED_BY_WUJIE__, wujieAppList } from '@/config';
-import bus from '@/eventBus';
 import axios from '@/plugin/service';
 import processes from '@/stores/processes';
 import { WindowType, type FilesResultType } from '@/types/popWindow';
 import { exportFiles, getProgramName } from '@/utils';
-import { computed, createApp, h, nextTick, onMounted, reactive, ref, resolveComponent, withModifiers } from 'vue';
+import { programDirective } from '@/utils/directives';
+import { computed, createApp, defineComponent, h, reactive, ref, resolveComponent, withModifiers } from 'vue';
 import WujieVue from 'wujie-vue3';
 import './popWindow.scss';
 
@@ -24,7 +24,12 @@ export default class PopWindow {
 	public mouseMove(payload: MouseEvent) {}
 	public mouseUp(payload: MouseEvent) {}
 	public __el__: HTMLElement;
-	public windowStatus: WindowType = WindowType.DEFAULT;
+	public windowStatus = ref<WindowType>(WindowType.DEFAULT);
+	public __style__: any = {
+		defaultWidth: 0, // 默认宽
+		defaultHeight: 0, // 默认高
+	};
+	public transitionInstance: any = {};
 	constructor(
 		public programName: string,
 		public logo: string,
@@ -51,25 +56,12 @@ export default class PopWindow {
 		// 卸载节点即可
 		document.body.removeChild(this.__el__);
 	}
-	// 最小化
-	minimizeWindow() {
-		setTimeout(() => {
-			this.__el__.style.display = 'none';
-		}, 500);
-		this.windowStatus = WindowType.MINIMIZE;
-	}
-	// 恢复正常窗口
-	defaultWindow() {
-		this.__el__.style.display = 'block';
-		this.windowStatus = WindowType.DEFAULT;
-	}
-	// 全屏
-	maximizeWindow() {
-		this.windowStatus = WindowType.MAXIMIZE;
-	}
 	private renderer(fileName: string) {
 		const that = this;
-		return {
+		return defineComponent({
+			directives: {
+				programDirective,
+			},
 			setup() {
 				const store = processes();
 				let rendererComponents: any;
@@ -77,17 +69,6 @@ export default class PopWindow {
 				const styleHeight = ref<string>('0');
 				const styleScale = ref<number>(1);
 				const popWindowDom = ref<HTMLElement | null>(null);
-				onMounted(() => {
-					// 注册bus事件
-					bus.on('WindowChange', (type: any) => {
-						initStyleWidthHeight(type);
-						nextTick(() => {
-							//缩小
-							initTransfer(type);
-						});
-						that.defaultWindow();
-					});
-				});
 				if (!that.isWujieAPP) {
 					rendererComponents = loadComponents(that.programName);
 				}
@@ -114,39 +95,8 @@ export default class PopWindow {
 				initStyleWidthHeight();
 				// 初始化宽高
 				function initStyleWidthHeight(type: WindowType = WindowType.DEFAULT) {
-					if (type === WindowType.DEFAULT) {
-						styleWidth.value = that.isWujieAPP ? wujieAppList[fileName].defaultWidth : rendererComponents.windowWidth || '500';
-						styleHeight.value = that.isWujieAPP ? wujieAppList[fileName].defaultHeight : rendererComponents.windowHeight || '500';
-						styleScale.value = 1;
-						return;
-					} else if (type === WindowType.MAXIMIZE) {
-						styleWidth.value = window.innerWidth.toString();
-						styleHeight.value = (window.innerHeight - 130).toString(); // 减去底部栏
-						styleScale.value = 1;
-					} else if (type === WindowType.MINIMIZE) {
-						styleWidth.value = '0';
-						styleHeight.value = '0';
-						styleScale.value = 0.5;
-					}
-				}
-				// 初始transfer
-				function initTransfer(type: WindowType) {
-					if (type === WindowType.DEFAULT) {
-						transfer.clientX = window.innerWidth / 2 - Number(styleWidth.value) / 2;
-						transfer.clientY = window.innerHeight / 2 - Number(styleHeight.value) / 2;
-						transfer.offsetX = 0;
-						transfer.offsetY = 0;
-					} else if (type === WindowType.MAXIMIZE) {
-						transfer.clientX = 0;
-						transfer.clientY = 0;
-						transfer.offsetX = 0;
-						transfer.offsetY = 0;
-					} else if (type === WindowType.MINIMIZE) {
-						transfer.clientX = window.innerWidth / 2;
-						transfer.clientY = window.innerHeight;
-						transfer.offsetX = 0;
-						transfer.offsetY = 0;
-					}
+					that.__style__.defaultWidth = that.isWujieAPP ? wujieAppList[fileName].defaultWidth : rendererComponents.windowWidth || '500';
+					that.__style__.defaultHeight = that.isWujieAPP ? wujieAppList[fileName].defaultHeight : rendererComponents.windowHeight || '500';
 				}
 				const customHeader = computed(() => {
 					if (__POWERED_BY_WUJIE__ && wujieAppList[fileName]) {
@@ -165,8 +115,8 @@ export default class PopWindow {
 				}
 				const isMove = ref(false);
 				const transfer = reactive({
-					clientX: window.innerWidth / 2 - Number(styleWidth.value) / 2,
-					clientY: window.innerHeight / 2 - Number(styleHeight.value) / 2,
+					clientX: window.innerWidth / 2 - Number(that.__style__.defaultWidth) / 2,
+					clientY: window.innerHeight / 2 - Number(that.__style__.defaultHeight) / 2,
 					offsetX: 0,
 					offsetY: 0,
 				});
@@ -220,24 +170,11 @@ export default class PopWindow {
 							break;
 						case '1':
 							// 最小化
-							initStyleWidthHeight(WindowType.MINIMIZE);
-							initTransfer(WindowType.MINIMIZE);
-							that.minimizeWindow();
+							that.windowStatus.value = WindowType.MINIMIZE;
 							break;
 						case '2':
-							if (that.windowStatus === WindowType.DEFAULT) {
-								// 放大
-								initTransfer(WindowType.MAXIMIZE);
-								initStyleWidthHeight(WindowType.MAXIMIZE);
-								that.maximizeWindow();
-							} else {
-								initStyleWidthHeight(WindowType.DEFAULT);
-								nextTick(() => {
-									//缩小
-									initTransfer(WindowType.DEFAULT);
-								});
-								that.defaultWindow();
-							}
+							// 放大/缩小
+							that.windowStatus.value = that.windowStatus.value === WindowType.DEFAULT ? WindowType.MAXIMIZE : WindowType.DEFAULT;
 							break;
 					}
 				}
@@ -247,10 +184,9 @@ export default class PopWindow {
 						style={{
 							left: positionLeft.value,
 							top: positionTop.value,
-							width: `${styleWidth.value}px`,
-							height: `${styleHeight.value}px`,
 							scale: styleScale.value,
 						}}
+						v-programDirective={that.windowStatus.value}
 						onMouseup={!customHeader.value ? mouseUp : () => {}}
 						onMousedown={withModifiers(mouseDown, ['left'])}
 						onMousemove={mouseMove}
@@ -274,6 +210,6 @@ export default class PopWindow {
 					</div>
 				);
 			},
-		};
+		});
 	}
 }

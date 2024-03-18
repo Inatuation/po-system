@@ -65,7 +65,7 @@ export default defineComponent({
 						<div class="introduce desabled-copy">
 							<img src={new URL('@/assets/desktop/logo.jpeg', import.meta.url).href} class="in_logo" ref={box} />
 							<div ref={topContext} class="in_top">
-								最智能的系统
+								博约而进取｜厚积而薄发
 							</div>
 							<div ref={nameContext} class="in_content">
 								破写代码的

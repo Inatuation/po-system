@@ -1,4 +1,3 @@
-import bus from '@/eventBus';
 import dockStore from '@/stores/dockStore';
 import processes from '@/stores/processes';
 import { WindowType } from '@/types/popWindow';
@@ -14,7 +13,7 @@ export default defineComponent({
 		}
 		function clickProgramBar(e: any) {
 			if (store.activeProgram.windowStatus === WindowType.MINIMIZE) {
-				bus.emit('WindowChange', WindowType.DEFAULT);
+				store.activeProgram.windowStatus = WindowType.DEFAULT;
 			}
 			store.toggleProgram(e.target.dataset.programname);
 		}
