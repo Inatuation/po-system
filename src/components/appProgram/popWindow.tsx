@@ -65,9 +65,6 @@ export default class PopWindow {
 			setup() {
 				const store = processes();
 				let rendererComponents: any;
-				const styleWidth = ref<string>('0');
-				const styleHeight = ref<string>('0');
-				const styleScale = ref<number>(1);
 				const popWindowDom = ref<HTMLElement | null>(null);
 				if (!that.isWujieAPP) {
 					rendererComponents = loadComponents(that.programName);
@@ -184,7 +181,6 @@ export default class PopWindow {
 						style={{
 							left: positionLeft.value,
 							top: positionTop.value,
-							scale: styleScale.value,
 						}}
 						v-programDirective={that.windowStatus.value}
 						onMouseup={!customHeader.value ? mouseUp : () => {}}
@@ -204,7 +200,7 @@ export default class PopWindow {
 								</span>
 							</div>
 						)}
-						<div class="pop_window_content">
+						<div class={{ pop_window_content: !that.isWujieAPP }}>
 							<rendererComponents></rendererComponents>
 						</div>
 					</div>
