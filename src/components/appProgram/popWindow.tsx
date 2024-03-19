@@ -5,8 +5,8 @@ import processes from '@/stores/processes';
 import { WindowType, type FilesResultType } from '@/types/popWindow';
 import { exportFiles, getProgramName } from '@/utils';
 import { programDirective } from '@/utils/directives';
+import microApp from '@micro-zoe/micro-app';
 import { computed, createApp, defineComponent, h, reactive, ref, resolveComponent, withModifiers } from 'vue';
-import WujieVue from 'wujie-vue3';
 import './popWindow.scss';
 
 function loadComponents(programName: string) {
@@ -46,7 +46,7 @@ export default class PopWindow {
 			msg: this.fileName,
 		});
 		if (__POWERED_BY_WUJIE__ && wujieAppList[this.fileName]) {
-			app.use(WujieVue);
+			// app.use(WujieVue);
 		}
 		app.config.globalProperties.$axios = axios;
 		app.mount(this.__el__);
@@ -73,21 +73,32 @@ export default class PopWindow {
 				store.trackProgram(that); // 将程序推入进程// 关闭窗口
 				// 是否启用wujie
 				if (that.isWujieAPP && wujieAppList[fileName]) {
-					const wujie = resolveComponent('WujieVue');
-					// 判断wujieAppList中是否存在该程序
-					const { setupApp } = WujieVue;
-					setupApp({ name: wujieAppList[fileName].name, url: wujieAppList[fileName].url, exec: true });
-					rendererComponents = h(wujie, {
-						props: {
-							appProgramStore: store,
-						},
-						width: `${wujieAppList[fileName].defaultWidth}px`,
-						height: `${wujieAppList[fileName].defaultHeight}px`,
-						alive: wujieAppList[fileName].alive,
-						sync: wujieAppList[fileName].sync,
+					const app = resolveComponent('micro-app');
+					rendererComponents = h(app, {
 						name: wujieAppList[fileName].name,
-						url: wujieAppList[fileName].url,
+						url: 'http://localhost:8099/',
+						iframe: true,
 					});
+					microApp.setGlobalData({
+						appProgramStore: store,
+						defaultWidth: wujieAppList[fileName].defaultWidth,
+						defaultHeight: wujieAppList[fileName].defaultHeight,
+					});
+					// const wujie = resolveComponent('micro-app');
+					// // 判断wujieAppList中是否存在该程序
+					// const { setupApp } = WujieVue;
+					// setupApp({ name: wujieAppList[fileName].name, url: wujieAppList[fileName].url, exec: true });
+					// rendererComponents = h(wujie, {
+					// 	props: {
+					// 		appProgramStore: store,
+					// 	},
+					// 	width: `${wujieAppList[fileName].defaultWidth}px`,
+					// 	height: `${wujieAppList[fileName].defaultHeight}px`,
+					// 	alive: wujieAppList[fileName].alive,
+					// 	sync: wujieAppList[fileName].sync,
+					// 	name: wujieAppList[fileName].name,
+					// 	url: wujieAppList[fileName].url,
+					// });
 				}
 				initStyleWidthHeight();
 				// 初始化宽高
