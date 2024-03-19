@@ -76,7 +76,7 @@ export default class PopWindow {
 					const app = resolveComponent('micro-app');
 					rendererComponents = h(app, {
 						name: wujieAppList[fileName].name,
-						url: 'http://localhost:8099/',
+						url: wujieAppList[fileName].url,
 						iframe: true,
 					});
 					microApp.setGlobalData({
